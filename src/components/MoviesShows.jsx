@@ -1,77 +1,77 @@
-import { Component } from "react"
+import { useEffect, useState } from "react"
 import { Carousel, Col, Container, Spinner, Row } from "react-bootstrap"
+import { useNavigate } from "react-router-dom"
 
-class MoviesShows extends Component {
-  state = {
-    movies: [],
-    isLoading: true
-  }
+const MoviesShows = ({ movie }) => {
+  const [movies, setMovies] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  moviesFetch = async () => {
+  const moviesFetch = async () => {
     try {
       let response = await fetch(
-        "http://www.omdbapi.com/?i=tt3896198&apikey=712dba3e&s=" +
-          this.props.movie
+        "http://www.omdbapi.com/?i=tt3896198&apikey=712dba3e&s=" + movie
       )
 
       if (response.ok) {
         let data = await response.json()
-        this.setState({ movies: data.Search, isLoading: false })
+        setMovies(data.Search)
+        setIsLoading(false)
       } else {
         alert("Something went wrong :(")
-        this.setState({ isLoading: false })
+        setIsLoading(false)
       }
     } catch (error) {
       alert(error)
-      this.setState({ isLoading: false })
+      setIsLoading(false)
     }
   }
 
-  componentDidMount = () => {
-    this.moviesFetch()
-  }
+  const navigate = useNavigate()
 
-  render() {
-    return (
-      <Container fluid>
-        {this.state.isLoading && (
-          <Spinner animation="border" variant="warning" />
-        )}
-        <h4 className="d-flex my-3 movie-title">{this.props.movie}</h4>
-        <Carousel indicators={false} className="my-2">
-          <Carousel.Item>
-            <Row className="d-flex justify-content-center ">
-              {this.state.movies
-                .filter((movie, index) => index < 5)
-                .map((movie) => (
-                  <Col md={2} key={movie.imdbID}>
-                    <img
-                      src={movie.Poster}
-                      alt={movie.Title}
-                      className="carousel-img-style"
-                    />
-                  </Col>
-                ))}
-            </Row>
-          </Carousel.Item>
-          <Carousel.Item>
-            <Row className="d-flex justify-content-center ">
-              {this.state.movies
-                .filter((movie, index) => index < 12 && index >= 5)
-                .map((movie) => (
-                  <Col md={2} key={movie.imdbID}>
-                    <img
-                      src={movie.Poster}
-                      alt={movie.Title}
-                      className="carousel-img-style"
-                    />
-                  </Col>
-                ))}
-            </Row>
-          </Carousel.Item>
-        </Carousel>
-      </Container>
-    )
-  }
+  useEffect(() => {
+    moviesFetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <Container fluid>
+      {isLoading && <Spinner animation="border" variant="warning" />}
+      <h4 className="d-flex my-3 movie-title">{movie}</h4>
+      <Carousel indicators={false} className="my-2">
+        <Carousel.Item>
+          <Row className="d-flex justify-content-center ">
+            {movies
+              .filter((movie, index) => index < 5)
+              .map((movie) => (
+                <Col md={2} key={movie.imdbID}>
+                  <img
+                    src={movie.Poster}
+                    alt={movie.Title}
+                    className="carousel-img-style"
+                    onClick={() => navigate("/details/" + movie.imdbID)}
+                  />
+                </Col>
+              ))}
+          </Row>
+        </Carousel.Item>
+        <Carousel.Item>
+          <Row className="d-flex justify-content-center ">
+            {movies
+              .filter((movie, index) => index < 12 && index >= 5)
+              .map((movie) => (
+                <Col md={2} key={movie.imdbID}>
+                  <img
+                    src={movie.Poster}
+                    alt={movie.Title}
+                    className="carousel-img-style"
+                    onClick={() => navigate("/details/" + movie.imdbID)}
+                  />
+                </Col>
+              ))}
+          </Row>
+        </Carousel.Item>
+      </Carousel>
+    </Container>
+  )
 }
 export default MoviesShows
